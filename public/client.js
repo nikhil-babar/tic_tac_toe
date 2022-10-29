@@ -1,9 +1,9 @@
-const socket = new WebSocket('ws://localhost:3000');
 var gameId = '';
 var playerId = '';
 var symbol = '';
 var board = [];
-const name = "nikhil";
+const name = prompt("Enter your name");
+const socket = new WebSocket('ws://localhost:3000?name='+name);
 
 socket.onopen = function () {
     console.log("connected to the server");
@@ -13,18 +13,12 @@ socket.onmessage = async function (msg) {
 
     const data = JSON.parse(msg.data);
 
-    if(data.tag !== 'updateName'){
-        gameId = data.gameId;
-        playerId = data.id;
-        symbol = data.symbol;
-        board = data.board;
-    }
+    gameId = data.gameId;
+    playerId = data.id;
+    symbol = data.symbol;
+    board = data.board;
 
     switch (data.tag) {
-        case 'updateName':
-            console.log('got the event');
-            sendMessage(name, 'updateName');
-            break;
         case 'no-player':
             document.querySelector('.message').textContent = "Waiting for opponent to join";
             break;
@@ -37,7 +31,7 @@ socket.onmessage = async function (msg) {
         case 'wait' :
             const p = data.player;
             const o = data.opponent;
-            document.querySelector('.message').textContent = p + " vs " + o + "=>" + "waiting for "+ p + " to play...";
+            document.querySelector('.message').textContent = p + " vs " + o + "=>" + "waiting for "+ o + " to play...";
             Board(board,data.tag);
             break;
         case 'won' :
@@ -46,6 +40,10 @@ socket.onmessage = async function (msg) {
             break;
         case 'lost':
             document.querySelector('.message').textContent = "Better luck next time:)"
+            Board(board, data.tag);
+            break;
+        case 'draw':
+            document.querySelector('.message').textContent = "Match drawn!"
             Board(board, data.tag);
             break;
         default:
