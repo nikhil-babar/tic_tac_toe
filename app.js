@@ -24,16 +24,17 @@ var players = [];
 var playerIds = [];
 
 
-socket.on('connection', async function (ws,req) {
+socket.on('connection', function (ws,req) {
     try {
         ws.name = url.parse(req.url, true).query.name;
         const gameId = alotGame(ws);
 
-        if(games[gameId].player2 != null){
+        if(games[gameId].player2 !== null){
             playGame(gameId);
         }
 
         ws.on('message', clientMsg);
+
     } catch (error) {
         console.log(error);
     }
@@ -43,6 +44,7 @@ socket.on('connection', async function (ws,req) {
 function alotGame(ws) {
     try {
         for(var id of gameIds){
+            console.log("from alotGame: " + gameIds);
             if(games[id].player2 === null){
                 const player = {
                     'name' : ws.name,
@@ -56,7 +58,7 @@ function alotGame(ws) {
                 playerIds.push(playerId);
 
                 games[id].player2 = playerId;
-
+                sendMsg(playerId, id, null, 'no-player');
                 return id;
             }
         }
@@ -86,25 +88,9 @@ function playGame(gameId) {
             game.turn = 1;
         }
     
-        const gamesDetails = {
-            'tag' : s1,
-            'board' : game.board,
-            'player' : players[p1].name,
-            'opponent' : players[p2].name,
-            'symbol' : players[p1].symbol,
-            'id' : p1,
-            'gameId': gameId
-        }
-    
-        sendMsg(players[p1].client, gamesDetails);
-    
-        gamesDetails.symbol = players[p2].symbol;
-        gamesDetails.id = p2;
-        gamesDetails.player = players[p2].name;
-        gamesDetails.opponent = players[p1].name;
-        gamesDetails.tag = s2;
-    
-        sendMsg(players[p2].client, gamesDetails);
+        sendMsg(p1,gameId,{'player' : players[p1].name,'opponent' : players[p2].name},s1);
+
+        sendMsg(p2,gameId,{'player' : players[p2].name,'opponent' : players[p1].name},s2);
 
     } catch (error) {
         console.log(error);
@@ -137,19 +123,43 @@ function createGame(ws) {
         game.player1 = playerId;
         games[gameId] = game;
         gameIds.push(gameId);
-
-
-        sendMsg(ws, {
-            'tag' : 'no-player',
-            'gameId' : gameId,
-            'id' : playerId
-        });
-
+        
+        sendMsg(playerId, gameId, null, 'no-player');
         return gameId;
 
     } catch (error) {
         console.log(error);
     }  
+}
+
+
+function destroy(gameId) {
+    const p1 = games[gameId].player1;
+    const p2 = games[gameId].player2;
+
+
+    let index = gameIds.indexOf(gameId);
+
+    if(index > -1){
+        console.log(gameId);
+        gameIds.splice(index,1);
+    }
+
+    index = playerIds.indexOf(p1);
+
+    if(index > -1){
+        playerIds.splice(index,1);
+    }
+
+    index = playerIds.indexOf(p2);
+
+    if(index > -1){
+        playerIds.splice(index,1);
+    }
+
+    delete games[gameId];
+    delete players[p1];
+    delete players[p2];
 }
 
 function checkGame(board) {
@@ -219,50 +229,65 @@ function clientMsg(msg) {
             }
 
             else if(flag === true){
-                const data = {
-                    'tag': 'draw',
-                    'board': games[gameId].board,
-                }
-
-                const p1 = players[games[gameId].player1];
-                const p2 = players[games[gameId].player2];
-
-                sendMsg(p1.client, data);
-                sendMsg(p2.client, data);
+                sendMsg(games[gameId].player1, gameId, null, 'draw');
+                sendMsg(games[gameId].player2, gameId, null, 'draw');
             }
 
-            else{
-                const data = {
-                    'tag': 'won',
-                    'board': games[gameId].board,
-                }
-
-                const p1 = players[games[gameId].player1];
-                const p2 = players[games[gameId].player2];
-                
-                
+            else{            
                 if(p1.symbol === flag){
-                    sendMsg(p1.client, data);
-                    data.tag = 'lost';
-                    sendMsg(p2.client, data);
+                    sendMsg(games[gameId].player1, gameId, null, 'won');
+                    sendMsg(games[gameId].player2, gameId, null, 'lost');
                 }
 
                 else{
-                    sendMsg(p2.client, data);
-                    data.tag = 'lost';
-                    sendMsg(p1.client, data);
+                    sendMsg(games[gameId].player1, gameId, null, 'lost');
+                    sendMsg(games[gameId].player2, gameId, null, 'won');
                 }
             }
 
             break;
+
+        case 'chat':
+            try {
+                switch (playerId) {
+                    case games[gameId].player1:
+                        sendMsg(games[gameId].player2, gameId, message, 'chat');
+                        break;
+    
+                    case games[gameId].player2:
+                        sendMsg(games[gameId].player1, gameId, message, 'chat');
+                        break;
+                
+                    default:
+                        break;
+                }
+            } catch (error) {
+                console.log(error);
+            }
+            break;
+        case 'close':
+            // console.log(games);
+            // console.log(players);
+            destroy(gameId);
         default:
             break;
     }
 }
 
-function sendMsg(ws, msg) {
+function sendMsg(playerId, gameId, msg, tag) {
     try {
-        ws.send(JSON.stringify(msg));
+        const data = {
+            'id' : playerId,
+            'gameId' : gameId,
+            'msg' : msg,
+            'tag' : tag,
+            'board' : games[gameId].board,
+            'symbol' : players[playerId].symbol,
+        }
+
+        const client = players[playerId].client;
+
+        client.send(JSON.stringify(data));
     } catch (error) {
         console.log(error);
     }

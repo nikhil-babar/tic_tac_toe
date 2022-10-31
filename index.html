@@ -8,19 +8,31 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1 class="message" style="text-align: center;"></h1>
     <div class="outer-container">
-       
+        <h1 class="message" style="text-align: center;"></h1>
+
         <div class="container">
-            <div class="cell" id="cell-00"></div>
-            <div class="cell" id="cell-01"></div>
-            <div class="cell" id="cell-02"></div>
-            <div class="cell" id="cell-10"></div>
-            <div class="cell" id="cell-11"></div>
-            <div class="cell" id="cell-12"></div>
-            <div class="cell" id="cell-20"></div>
-            <div class="cell" id="cell-21"></div>
-            <div class="cell" id="cell-22"></div>
+            <div class="grid">
+                <div class="cell" id="cell-00"></div>
+                <div class="cell" id="cell-01"></div>
+                <div class="cell" id="cell-02"></div>
+                <div class="cell" id="cell-10"></div>
+                <div class="cell" id="cell-11"></div>
+                <div class="cell" id="cell-12"></div>
+                <div class="cell" id="cell-20"></div>
+                <div class="cell" id="cell-21"></div>
+                <div class="cell" id="cell-22"></div>
+            </div>
+
+            <div id="message-box">
+                <div id="message-list">
+                </div>
+
+                <footer>
+                    <input type="text" name="message" id="text" placeholder="Enter your message">
+                    <button type="submit" id="subbtn">send</button>
+                </footer>
+            </div>
         </div>
     </div>
 

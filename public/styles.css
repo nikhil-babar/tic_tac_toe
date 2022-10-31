@@ -3,17 +3,21 @@ body{
 }
 
 .container{
-    position: absolute;
+    display: grid;
+    grid-template-columns: 70vw 20vw;
+    height: 80vh;
+}
+
+.grid{
     display: grid;
     grid-template-columns: auto auto auto;
-    padding: 10px;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    width: 30%;
-    height: 60%;
+    width: 42%;
+    height: 70%;
     margin: auto;
+}
+
+.message-box{
+    width: 20vw;
 }
 
 .cell{
