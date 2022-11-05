@@ -2,19 +2,19 @@ var gameId = '';
 var playerId = '';
 var symbol = '';
 var board = [];
-const name = "nikhil";
+const name = prompt("Enter your name");
 let gameState = 'wait';
-const socket = new WebSocket('ws://localhost:3000?name='+name);
+const socket = new WebSocket('ws://localhost:3000?name=' + name);
 
 window.onbeforeunload = function () {
     sendMessage(null, 'close');
 }
 
+
 //********************************************************************************
-const messages = [];
-const msgBox = document.querySelector('#message-list');
-const msgButton = document.querySelector('#subbtn');
-const msgText = document.querySelector('#text');
+const msgBox = document.querySelector('.message-list');
+const msgButton = document.querySelector('.subbtn');
+const msgText = document.querySelector('.text');
 
 msgButton.addEventListener('click', chat);
 
@@ -23,28 +23,32 @@ function chat() {
     msgText.value = '';
     sendMessage(message, 'chat');
     const chat = {
-        'tag' : 'player',
-        'msg' : message
+        'tag': 'player',
+        'msg': message
     }
     addMessage(chat);
 }
 
 function addMessage(chat) {
-    const p = document.createElement('p');
+    const li = document.createElement('li');
+    li.classList.add("list-group-item", "bg-dark", "text-light", "h5");
+
+    li.innerText = chat.msg;
+    li.style.border = "none";
     
-    p.innerText = chat.msg;
-    if(chat.tag === 'opponent'){
-        p.style.textAlign = 'left';
+    if (chat.tag === 'opponent') {
+        li.classList.add("text-end");
     }
-    else{
-        p.style.textAlign = 'right';
-    }
-    msgBox.appendChild(p);
+    msgBox.appendChild(li);
 }
 
 // *******************************************************************************
 
 const cells = document.querySelectorAll('.cell');
+const messages = document.querySelector('.message');
+const details = document.querySelector('.details-box');
+const player_name = document.querySelector(".player");
+const opponent_name = document.querySelector(".opponent");
 
 cells.forEach(function (cell) {
     cell.addEventListener('click', changeBackground);
@@ -65,41 +69,47 @@ socket.onmessage = function (msg) {
 
     switch (data.tag) {
         case 'no-player':
-            document.querySelector('.message').textContent = "Waiting for opponent to join";
+            createSymbol();
+            console.log('wait');
+            messages.textContent = "Waiting for opponent to join";
             break;
-        case 'play' :
+        case 'play':
+            let p = data.msg.player;
+            let o = data.msg.opponent;
             console.log("play");
             gameState = 'play';
-            const p1 = data.msg.player;
-            const p2 = data.msg.opponent;
-            document.querySelector('.message').textContent = p1 + " vs " + p2 + "=>" + "It's your turn "+ p1;
-            Board(board,data.tag);
+            messages.textContent = "It's your turn " + p;
+            player_name.innerHTML = p;
+            opponent_name.innerHTML = o;
+            Board(board, data.tag);
             break;
-        case 'wait' :
+        case 'wait':
+            let p1 = data.msg.player;
+            let p2 = data.msg.opponent;
             gameState = 'wait';
-            const p = data.msg.player;
-            const o = data.msg.opponent;
-            document.querySelector('.message').textContent = p + " vs " + o + "=>" + "waiting for "+ o + " to play...";
-            Board(board,data.tag);
+            messages.textContent = "waiting for " + p2 + " to play....";
+            player_name.innerHTML = p1;
+            opponent_name.innerHTML = p2;
+            Board(board, data.tag);
             break;
-        case 'chat' :
+        case 'chat':
             const message = data.msg;
             const chat = {
-                'tag' : 'opponent',
-                'msg' : message
+                'tag': 'opponent',
+                'msg': message
             }
             addMessage(chat);
             break;
-        case 'won' :
-            document.querySelector('.message').textContent = "Congo, you won!"
+        case 'won':
+            messages.textContent = "Congo, you won!"
             Board(board, data.tag);
             break;
         case 'lost':
-            document.querySelector('.message').textContent = "Better luck next time:)"
+            messages.textContent = "Better luck next time:)"
             Board(board, data.tag);
             break;
         case 'draw':
-            document.querySelector('.message').textContent = "Match drawn!"
+            messages.textContent = "Match drawn!"
             Board(board, data.tag);
             break;
         default:
@@ -107,24 +117,40 @@ socket.onmessage = function (msg) {
     }
 }
 
+function createSymbol() {
+    let element = document.querySelector(".symbol");
+    let image = document.createElement("img");
 
-function Board(board,tag) {
+    if(symbol === 'x'){
+        image.src = "card-1.png";
+    }else{
+        image.src = "card-0.png";
+    }
 
-    for(var i = 0 ; i <= 2; i++){
-        for(var j = 0 ; j <= 2 ; j++){
-            const element = document.getElementById('cell-'+i+j);
+    image.classList.add("w-25");
+    element.appendChild(image);
+}
 
-            if(board[i][j] == 'x'){
+
+function Board(board, tag) {
+
+    for (var i = 0; i <= 2; i++) {
+        for (var j = 0; j <= 2; j++) {
+            const element = document.getElementById('cell-' + i + j);
+
+            if (board[i][j] == 'x') {
                 element.style.backgroundImage = "url('card-1.png')";
+                element.style.backgroundSize = "100%";
                 element.style.backgroundRepeat = "no-repeat";
                 element.style.backgroundPosition = "center"
             }
-            else if(board[i][j] == 'o'){
+            else if (board[i][j] == 'o') {
                 element.style.backgroundImage = "url('card-0.png')";
+                element.style.backgroundSize = "70%";
                 element.style.backgroundRepeat = "no-repeat";
                 element.style.backgroundPosition = "center"
             }
-            else{
+            else {
                 element.style.backgroundImage = "none";
             }
         }
@@ -132,43 +158,47 @@ function Board(board,tag) {
 }
 
 function changeBackground(src) {
-    
+
     const id = src.target.id;
     const element = document.getElementById(id);
-    alert(gameState);
 
-    if(element.style.backgroundImage === 'none' && gameState === 'play'){
-        if(symbol === 'x') element.style.backgroundImage = "url('card-1.png')";
+    if (element.style.backgroundImage === 'none' && gameState === 'play') {
+        if (symbol === 'x'){
+            element.style.backgroundImage = "url('card-1.png')";
+            element.style.backgroundSize = "100%";
+        }
 
-        else element.style.backgroundImage = "url('card-0.png')";
-    
+        else{
+            element.style.backgroundImage = "url('card-0.png')";
+            element.style.backgroundSize = "70%";
+        }
+
         element.style.backgroundRepeat = "no-repeat";
-        element.style.backgroundPosition = "center";''
-        
-    
+        element.style.backgroundPosition = "center"; ''
+
+
         const x = parseInt(id.charAt(5));
         const y = parseInt(id.charAt(6));
-    
+
         board[x][y] = symbol;
-    
+
         sendMessage(board, 'move');
     }
 }
 
 
 function sendMessage(msg, tag) {
-   try {
+    try {
 
-    const data = {
+        const data = {
+            'tag': tag,
+            'msg': msg,
+            'gameId': gameId,
+            'id': playerId
+        }
 
-        'tag': tag,
-        'msg': msg,
-        'gameId' : gameId,
-        'id' : playerId
+        socket.send(JSON.stringify(data));
+    } catch (error) {
+        console.log(error);
     }
-
-    socket.send(JSON.stringify(data));
-   } catch (error) {
-    console.log(error);
-   }
 }

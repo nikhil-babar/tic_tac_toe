@@ -1,5 +1,4 @@
 const express = require('express');
-const { resolve } = require('path');
 const url = require('url');
 const app = express();
 const websocket = require('ws').WebSocketServer;
@@ -44,7 +43,6 @@ socket.on('connection', function (ws,req) {
 function alotGame(ws) {
     try {
         for(var id of gameIds){
-            console.log("from alotGame: " + gameIds);
             if(games[id].player2 === null){
                 const player = {
                     'name' : ws.name,
@@ -141,7 +139,6 @@ function destroy(gameId) {
     let index = gameIds.indexOf(gameId);
 
     if(index > -1){
-        console.log(gameId);
         gameIds.splice(index,1);
     }
 
@@ -160,6 +157,10 @@ function destroy(gameId) {
     delete games[gameId];
     delete players[p1];
     delete players[p2];
+
+    console.log("After refresh event");
+    console.log("games: " + gameIds);
+    console.log("players: " + playerIds);
 }
 
 function checkGame(board) {
@@ -234,14 +235,14 @@ function clientMsg(msg) {
             }
 
             else{            
-                if(p1.symbol === flag){
-                    sendMsg(games[gameId].player1, gameId, null, 'won');
-                    sendMsg(games[gameId].player2, gameId, null, 'lost');
+                if(games[gameId].player2.symbol === flag){
+                    sendMsg(games[gameId].player2, gameId, null, 'won');
+                    sendMsg(games[gameId].player1, gameId, null, 'lost');
                 }
 
                 else{
-                    sendMsg(games[gameId].player1, gameId, null, 'lost');
-                    sendMsg(games[gameId].player2, gameId, null, 'won');
+                    sendMsg(games[gameId].player1, gameId, null, 'won');
+                    sendMsg(games[gameId].player2, gameId, null, 'lost');
                 }
             }
 
@@ -268,7 +269,7 @@ function clientMsg(msg) {
         case 'close':
             // console.log(games);
             // console.log(players);
-            destroy(gameId);
+            // destroy(gameId);
         default:
             break;
     }
@@ -276,6 +277,8 @@ function clientMsg(msg) {
 
 function sendMsg(playerId, gameId, msg, tag) {
     try {
+        console.log("games: " + gameIds);
+        console.log("players: " + playerIds);
         const data = {
             'id' : playerId,
             'gameId' : gameId,
