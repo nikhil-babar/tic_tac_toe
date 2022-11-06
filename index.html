@@ -10,9 +10,14 @@
         integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
 
     <style>
-        .grid {
+
+        body {
             background: url('chokeboard.jpg') center no-repeat;
             opacity: 0.85;
+        }
+
+        #table{
+            width: 465px;
         }
 
         .cell {
@@ -62,9 +67,9 @@
 
 <body class="bg-dark">
 
-    <div class="d-flex flex-column justify-content-center align-items-center grid" style="height: 100vh;">
-        <div class="row justify-content-between" style="width: 60%">
-            <div class="container img-fluid col" style="width: 40rem;">
+    <div class="d-lg-flex flex-column justify-content-center align-items-center grid my-5" style="height: 100vh;">
+        <div class="d-flex flex-lg-row flex-column justify-content-center">
+            <div class="container img-fluid " id = "table">
                 <div class="row">
                     <div class="col text-center cell" id="cell-00"></div>
                     <div class="col text-center cell" id="cell-01"></div>
@@ -82,21 +87,30 @@
                 </div>
             </div>
 
-            <div class="d-flex justify-content-center align-items-center col details-box">
-                <div class="text-light text-center">
-                    <div class="container justify-content-center symbol py-5">
+            <div class="d-flex flex-lg-column flex-row  justify-content-center">
+                <div class="d-flex justify-content-center align-items-center details-box " style="width: 465px;">
+                    <div class="text-light text-center">
+                        <div class="container justify-content-center symbol py-5">
 
+                        </div>
+                        <h1 class="text-center justify-content-center"><span class="text-success player">.....</span> vs
+                            <span class="text-info opponent">.....</span></h1>
                     </div>
-                    <h1 class="text-center justify-content-evenly"><span class="text-success player">.....</span> vs <span
-                            class="text-info opponent">.....</span></h1>
                 </div>
             </div>
+
         </div>
 
         <div class="text-light p-5 mt-3">
-            <h2 class="message"></h2>
-            <div class="text-center"><button type="button" class="btn btn-outline-success bt-sm ms-auto w-25" data-bs-toggle="modal"
-                data-bs-target="#chat">Chat</button></div>
+            <h2 class="message text-center"></h2>
+            <div class="text-center">
+                <div class="btn-group">
+                    <button type="button" class="btn btn-outline-success text-center" data-bs-toggle="modal"
+                        data-bs-target="#chat">Chat</button>
+                    <button type="button"
+                        class="btn btn-outline-success px-3 text-center t-button d-none">Rematch</button>
+                </div>
+            </div>
 
         </div>
     </div>
@@ -110,7 +124,7 @@
                 </div>
                 <div class="modal-body" style="border: none;">
                     <ul class="list-group message-list">
-        
+
                     </ul>
                 </div>
                 <div class="modal-footer">

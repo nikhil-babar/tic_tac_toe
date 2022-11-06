@@ -31,7 +31,7 @@ function chat() {
 
 function addMessage(chat) {
     const li = document.createElement('li');
-    li.classList.add("list-group-item", "bg-dark", "text-light", "h5");
+    li.classList.add("list-group-item", "bg-dark", "text-light", "h6");
 
     li.innerText = chat.msg;
     li.style.border = "none";
@@ -49,9 +49,16 @@ const messages = document.querySelector('.message');
 const details = document.querySelector('.details-box');
 const player_name = document.querySelector(".player");
 const opponent_name = document.querySelector(".opponent");
+const target_button = document.querySelector(".t-button");
 
 cells.forEach(function (cell) {
     cell.addEventListener('click', changeBackground);
+})
+
+target_button.addEventListener('click', function () {
+
+    if(!target_button.hasAttribute('data-bs-toggle'))
+    sendMessage(null, 'rematch');
 })
 
 socket.onopen = function () {
@@ -67,11 +74,13 @@ socket.onmessage = function (msg) {
     symbol = data.symbol;
     board = data.board;
 
+    target_button.classList.add("d-none");
     switch (data.tag) {
         case 'no-player':
             createSymbol();
             console.log('wait');
             messages.textContent = "Waiting for opponent to join";
+            player_name.innerHTML = name;
             break;
         case 'play':
             let p = data.msg.player;
@@ -88,7 +97,7 @@ socket.onmessage = function (msg) {
             let p2 = data.msg.opponent;
             gameState = 'wait';
             messages.textContent = "waiting for " + p2 + " to play....";
-            player_name.innerHTML = p1;
+            player_name.innerHTML = name;
             opponent_name.innerHTML = p2;
             Board(board, data.tag);
             break;
@@ -101,16 +110,26 @@ socket.onmessage = function (msg) {
             addMessage(chat);
             break;
         case 'won':
-            messages.textContent = "Congo, you won!"
+            messages.textContent = "Congo, you won!";
+            target_button.classList.remove("d-none");
             Board(board, data.tag);
             break;
         case 'lost':
-            messages.textContent = "Better luck next time:)"
+            messages.textContent = "Better luck next time:)";
+            target_button.classList.remove("d-none");
             Board(board, data.tag);
             break;
         case 'draw':
-            messages.textContent = "Match drawn!"
+            messages.textContent = "Match drawn!";
+            target_button.classList.remove("d-none");
+
             Board(board, data.tag);
+            break;
+        case 'rematch':
+            sendMessage(null, 'rematch-confirmed');
+            break;
+        case 'rematch-confirmed':
+
             break;
         default:
             break;

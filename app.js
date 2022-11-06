@@ -181,7 +181,7 @@ function checkGame(board) {
     }
 
     else if((board[0][2] === 'x' || board[0][2] === 'o') && board[0][2] === board[1][1] && board[1][1] === board[2][0]){
-        return board[2][0];
+        return board[0][2];
     }
 
     for(var i = 0 ; i <= 2 ; i++){
@@ -235,7 +235,7 @@ function clientMsg(msg) {
             }
 
             else{            
-                if(games[gameId].player2.symbol === flag){
+                if(games[gameId].player2 === playerId){
                     sendMsg(games[gameId].player2, gameId, null, 'won');
                     sendMsg(games[gameId].player1, gameId, null, 'lost');
                 }
@@ -270,6 +270,26 @@ function clientMsg(msg) {
             // console.log(games);
             // console.log(players);
             // destroy(gameId);
+        case 'rematch':
+            try {
+                if(games[gameId].player1 === playerId){
+                    sendMsg(games[gameId].player2, gameId, null, 'rematch');
+                }
+                else{
+                    sendMsg(games[gameId].player1, gameId, null, 'rematch');
+                }
+            } catch (error) {
+                console.log("Error in rematch");
+            }
+            break;
+        case 'rematch-confirmed':
+            try {
+                games[gameId].board = createBoard();
+                playGame(gameId);
+            } catch (error) {
+                console.log("error in rematch-confirmed");
+            }
+            break;
         default:
             break;
     }
