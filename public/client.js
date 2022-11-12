@@ -2,13 +2,11 @@ var gameId = '';
 var playerId = '';
 var symbol = '';
 var board = [];
-const name = prompt("Enter your name");
+const name = "nikhil";
 let gameState = 'wait';
-const socket = new WebSocket('ws://tic-tac-toe-nikhil-babar.herokuapp.com?name=' + name);
 
-window.onbeforeunload = function () {
-    sendMessage(null, 'close');
-}
+var HOST = location.origin.replace(/^http/, 'ws');
+const socket = new WebSocket(HOST);
 
 
 //********************************************************************************
