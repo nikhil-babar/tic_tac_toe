@@ -6,7 +6,7 @@ const name = "nikhil";
 let gameState = 'wait';
 
 var HOST = location.origin.replace(/^http/, 'ws');
-const socket = new WebSocket(HOST);
+const socket = new WebSocket(HOST + "?name=" + name);
 
 
 //********************************************************************************
