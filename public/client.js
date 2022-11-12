@@ -2,7 +2,7 @@ var gameId = '';
 var playerId = '';
 var symbol = '';
 var board = [];
-const name = "nikhil";
+const name = prompt("Enter your name");
 let gameState = 'wait';
 
 var HOST = location.origin.replace(/^http/, 'ws');
