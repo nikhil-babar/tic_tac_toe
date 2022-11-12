@@ -4,7 +4,7 @@ var symbol = '';
 var board = [];
 const name = prompt("Enter your name");
 let gameState = 'wait';
-const socket = new WebSocket('ws://localhost:3000?name=' + name);
+const socket = new WebSocket('ws://tic-tac-toe-nikhil-babar.herokuapp.com?name=' + name);
 
 window.onbeforeunload = function () {
     sendMessage(null, 'close');
