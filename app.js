@@ -11,7 +11,7 @@ app.get("/", function (req, res) {
     res.sendFile(__dirname + '/index.html');
 })
 
-server.listen(process.env.PORT ||3000, function () {
+server.listen(process.env.PORT || 3000, function () {
     console.log("server listening on port 3000");
 })
 
@@ -266,10 +266,6 @@ function clientMsg(msg) {
                 console.log(error);
             }
             break;
-        case 'close':
-            // console.log(games);
-            // console.log(players);
-            // destroy(gameId);
         case 'rematch':
             try {
                 if(games[gameId].player1 === playerId){
